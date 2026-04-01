@@ -1,0 +1,20 @@
+# Use Python 3.12 or 3.13 for the most reliable install experience.
+# Fresh-machine setup:
+#   py -3.13 -m venv .venv
+#   .venv\Scripts\activate
+#   pip install -r requirements.txt
+
+# Core runtime used by tools/predict.py and the local model package
+einops>=0.8.0
+numpy>=2.0.0
+pillow>=10.0.0
+protobuf>=5.0.0
+safetensors>=0.5.0
+sentencepiece>=0.2.0
+torch>=2.7.0
+torchvision>=0.22.0
+transformers==4.55.0
+
+# Optional CLI enhancements used by tools/launcher.py
+questionary>=2.1.0
+rich>=14.0.0
