@@ -5,7 +5,7 @@ from transformers import AutoProcessor, AutoModelForImageTextToText
 # ---- Settings ----
 model_path = "./model/PaddleOCR-VL-1.5"
 image_path = "./samples/test.png"
-task = "ocr" # Options: 'ocr' | 'table' | 'chart' | 'formula' | 'spotting' | 'seal'
+task = "chart" # Options: 'ocr' | 'table' | 'chart' | 'formula' | 'spotting' | 'seal'
 # ------------------
 
 image = Image.open(image_path).convert("RGB")

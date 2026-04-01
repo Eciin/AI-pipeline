@@ -1,34 +1,24 @@
-#!/usr/bin/env bash
-
+#!/bin/bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "${ROOT_DIR}"
+sudo apt update
+sudo apt-get install -y git-lfs
+git lfs install
+git lfs pull
+sudo apt install -y curl build-essential libssl-dev libbz2-dev libreadline-dev \
+  libsqlite3-dev libffi-dev zlib1g-dev libgdbm-dev liblzma-dev tk-dev
 
-if ! command -v python3.13 >/dev/null 2>&1; then
-  echo "python3.13 is required but was not found."
-  echo "Install Python 3.13 on the server, then rerun this script."
-  exit 1
-fi
+curl https://pyenv.run | bash
 
-if [[ ! -f requirements.txt ]]; then
-  echo "requirements.txt was not found in ${ROOT_DIR}."
-  exit 1
-fi
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
 
-if [[ ! -d model/PaddleOCR-VL-1.5 ]]; then
-  echo "model/PaddleOCR-VL-1.5 is missing."
-  echo "This repo needs the local model files before it can run."
-  exit 1
-fi
+pyenv install -s 3.13.9
+pyenv shell 3.13.9
 
-python3.13 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
 
-python -m pip install --upgrade pip setuptools wheel
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-
-echo
-echo "Environment is ready."
-echo "Venv: ${ROOT_DIR}/.venv"
-echo "Run with: source .venv/bin/activate && python tools/predict.py"
