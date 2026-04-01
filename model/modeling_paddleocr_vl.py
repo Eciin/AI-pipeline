@@ -63,7 +63,40 @@ else:
     flash_attn_varlen_func = None
     apply_rotary_emb = None
 
-from .configuration_paddleocr_vl import PaddleOCRVisionConfig, PaddleOCRVLConfig
+try:
+    from .configuration_paddleocr_vl import PaddleOCRVisionConfig, PaddleOCRVLConfig
+except ImportError:
+    from configuration_paddleocr_vl import PaddleOCRVisionConfig, PaddleOCRVLConfig
+
+
+def _compute_default_rope_parameters_compat(
+    config: PaddleOCRVLConfig,
+    device=None,
+    seq_len=None,
+    layer_type=None,
+):
+    """Compatibility fallback for Transformers builds that removed the 'default' RoPE entry."""
+    del seq_len, layer_type
+
+    base = getattr(config, "rope_theta", 10000.0)
+    partial_rotary_factor = getattr(config, "partial_rotary_factor", 1.0)
+    head_dim = getattr(config, "head_dim", None) or (
+        config.hidden_size // config.num_attention_heads
+    )
+    dim = int(head_dim * partial_rotary_factor)
+    inv_freq = 1.0 / (
+        base
+        ** (
+            torch.arange(0, dim, 2, dtype=torch.int64, device=device).float() / dim
+        )
+    )
+    return inv_freq, 1.0
+
+
+def _get_rope_init_fn(rope_type: str):
+    if rope_type == "default" and rope_type not in ROPE_INIT_FUNCTIONS:
+        return _compute_default_rope_parameters_compat
+    return ROPE_INIT_FUNCTIONS[rope_type]
 
 
 class RotaryEmbedding(nn.Module):
@@ -92,7 +125,7 @@ class RotaryEmbedding(nn.Module):
         self.original_max_seq_len = config.max_position_embeddings
 
         self.config = config
-        self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
+        self.rope_init_fn = _get_rope_init_fn(self.rope_type)
 
         inv_freq, self.attention_scaling = self.rope_init_fn(self.config, device)
         self.register_buffer("inv_freq", inv_freq, persistent=False)
@@ -160,6 +193,11 @@ class RotaryEmbedding(nn.Module):
         self.register_buffer("inv_freq", inv_freq, persistent=False)
         self.original_inv_freq = self.inv_freq
 
+    def compute_default_rope_parameters(self, config=None, device=None, seq_len=None):
+        return _compute_default_rope_parameters_compat(
+            config or self.config, device=device, seq_len=seq_len
+        )
+
 
 class Ernie4_5RotaryEmbedding(nn.Module):
     def __init__(self, config: PaddleOCRVLConfig, device=None):
@@ -175,7 +213,7 @@ class Ernie4_5RotaryEmbedding(nn.Module):
         self.original_max_seq_len = config.max_position_embeddings
 
         self.config = config
-        self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
+        self.rope_init_fn = _get_rope_init_fn(self.rope_type)
 
         inv_freq, self.attention_scaling = self.rope_init_fn(self.config, device)
         self.register_buffer("inv_freq", inv_freq, persistent=False)
@@ -206,6 +244,11 @@ class Ernie4_5RotaryEmbedding(nn.Module):
 
         # keeping it in full precision
         return cos, sin
+
+    def compute_default_rope_parameters(self, config=None, device=None, seq_len=None):
+        return _compute_default_rope_parameters_compat(
+            config or self.config, device=device, seq_len=seq_len
+        )
 
 
 class Ernie4_5MLP(nn.Module):
@@ -2342,7 +2385,7 @@ class PaddleOCRVLForConditionalGeneration(Ernie4_5PreTrainedModel, GenerationMix
 
         model_inputs["position_ids"] = None
 
-        if cache_position[0] != 0:
+        if cache_position is not None and cache_position[0] != 0:
             model_inputs["pixel_values"] = None
             model_inputs["pixel_values_videos"] = None
 
