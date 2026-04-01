@@ -9,10 +9,20 @@ The repo currently runs a local PaddleOCR-VL model from the checked-in `model/` 
 
 ## Setup
 
+Windows:
+
 ```bash
 py -3.13 -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+```
+
+Linux server:
+
+```bash
+chmod +x setup_server.sh
+./setup_server.sh
+source .venv/bin/activate
 ```
 ## Run
 
