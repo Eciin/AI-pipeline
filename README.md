@@ -4,32 +4,21 @@ This repository is where we build the pipeline for the **Jugo** project.
 
 The repo currently runs a local PaddleOCR-VL model from the checked-in `model/` directory and includes:
 
-- `tools/launcher.py` for an interactive CLI flow
 - `tools/predict.py` for direct command-line inference
 
 ## Setup
 
 Windows:
-
 ```bash
 py -3.13 -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
-
 Linux server:
-
 ```bash
 chmod +x setup_server.sh
 ./setup_server.sh
 source .venv/bin/activate
-```
-## Run
-
-Start the interactive launcher:
-
-```bash
-python tools/launcher.py
 ```
 
 ## Pipeline
