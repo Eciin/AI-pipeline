@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from transformers.configuration_utils import PretrainedConfig
+from transformers.modeling_rope_utils import rope_config_validation
 
 class PaddleOCRVisionConfig(PretrainedConfig):
     model_type = "paddleocr_vl"
@@ -186,4 +187,5 @@ class PaddleOCRVLConfig(PretrainedConfig):
             if self.rope_scaling["type"] == "mrope":
                 self.rope_scaling["type"] = "default"
             self.rope_scaling["rope_type"] = self.rope_scaling["type"]
+        rope_config_validation(self, ignore_keys={"mrope_section"})        
         super().__init__(tie_word_embeddings=tie_word_embeddings, **kwargs)
