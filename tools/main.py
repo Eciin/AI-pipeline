@@ -4,7 +4,7 @@ from transformers import AutoProcessor, AutoModelForImageTextToText
 
 # ---- Settings ----
 model_path = "./model/PaddleOCR-VL-1.5"
-image_path = "./samples/test.png"
+image_path = "./output/Opencv/processed_for_ocr.png"
 task = "chart" # Options: 'ocr' | 'table' | 'chart' | 'formula' | 'spotting' | 'seal'
 # ------------------
 
