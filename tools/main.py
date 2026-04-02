@@ -31,7 +31,7 @@ PROMPTS = {
     "seal": "Seal Recognition:",
 }
 
-model = AutoModelForImageTextToText.from_pretrained(model_path, torch_dtype=torch.float32).to(DEVICE).eval()
+model = AutoModelForImageTextToText.from_pretrained(model_path, torch_dtype=torch.bfloat16).to(DEVICE).eval()
 processor = AutoProcessor.from_pretrained(model_path)
 
 messages = [

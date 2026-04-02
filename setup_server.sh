@@ -14,6 +14,9 @@ export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
 
+pyenv install -s 3.13.9
+pyenv shell 3.13.9
+
 python -m venv .venv
 source .venv/bin/activate
 
